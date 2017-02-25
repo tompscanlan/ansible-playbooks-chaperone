@@ -1,0 +1,11 @@
+
+vsphere_validate_certs: no
+vsphere_username: administrator@vsphere.local
+vsphere_guest: "{{ansible_host}}"
+
+vsphere_from_template: yes
+vsphere_template_src: photon-password
+vsphere_cluster: BasementLab
+vsphere_resource_pool: "/Resources"
+vsphere_vm_extra_config:
+vsphere_folder: chap-test

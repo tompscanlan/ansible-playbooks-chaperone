@@ -1,0 +1,23 @@
+---
+
+# create an inventory group of hosts named here,
+# and this play will create vms based on the specified template.
+# That template should have ssh keys or a known password so
+# ansible may run against them:
+- name: Create vSphere VMs from a vm template
+  hosts: photon
+  gather_facts: false
+  connection: local
+  tasks:
+    - vsphere_guest:
+        vcenter_hostname: "{{ vcenter_hostname }}"
+        validate_certs: "{{ hostvars[vcenter_hostname]['vsphere_validate_certs'] }}"
+        username: "{{ hostvars[vcenter_hostname]['vsphere_username'] }}"
+        password: "{{ hostvars[vcenter_hostname]['vsphere_password'] }}"
+        guest: "{{ ansible_host }}"
+        from_template: "{{ hostvars[vcenter_hostname]['vsphere_from_template'] }}"
+        template_src: "{{ hostvars[vcenter_hostname]['vsphere_template_src'] }}"
+        cluster: "{{ hostvars[vcenter_hostname]['vsphere_cluster'] }}"
+        resource_pool: "{{ hostvars[vcenter_hostname]['vsphere_resource_pool'] }}"
+        vm_extra_config:
+          folder: "{{ hostvars[vcenter_hostname]['vsphere_folder'] }}"
