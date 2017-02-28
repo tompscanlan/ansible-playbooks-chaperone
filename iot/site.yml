@@ -14,9 +14,6 @@
 #  limitations under the License.
 ---
 
-- name: Prepare VMs
-  hosts: photon
-  roles:
-    - photon
-    - pip
-    - liota
+#- include: vm_template_prep.yml
+#- include: clone_vm_from_template.yml
+- include: prep_photon.yml

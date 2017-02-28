@@ -14,19 +14,18 @@
 #  limitations under the License.
 #
 ---
-- name: Prepare to deploy Photon VMs
+- name: Prepare to deploy template
   hosts: local
   roles:
     - govc
     - { role: assets, vars_files: [ vars/photon-ova-asset.yml ]}
 
-
-- name: Import photon OVA as template to each vcenter
+- name: Import OVA as template to each vcenter
   hosts: vcenter
   connection: local
   gather_facts: false
   tasks:
-    - command: "govc import.ova  -name=ansible-photon-import -u='https://{{ vsphere_username|quote }}:{{ vsphere_password|quote }}@{{ ansible_host|quote }}/sdk'  /tmp/photon.ova"
+    - command: "govc import.ova -name=ansible-photon-import -u='https://{{ vsphere_username|quote }}:{{ vsphere_password|quote }}@{{ ansible_host|quote }}/sdk' /tmp/photon.ova"
       register: command_result
       changed_when: "'already exists' not in command_result.stderr"
       failed_when: "command_result.rc !=0 and 'already exists' not in command_result.stderr"

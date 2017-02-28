@@ -1,7 +1,7 @@
 ---
-
 - name: Distribute local ssh key to all hosts
-  hosts: all
+  hosts: all:!vcenter:!localhost
+  gather_facts: false
   tasks:
     - name: Set authorized keys
       authorized_key:
@@ -10,7 +10,8 @@
         key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
 - name: Distribute github ssh keys to all hosts
-  hosts: all
+  hosts: all:!vcenter:!localhost
+  gather_facts: false
   tasks:
     - name: Set authorized keys
       authorized_key:

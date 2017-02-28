@@ -1,0 +1,108 @@
+---
+
+# create an inventory group of hosts named here,
+# and this play will create vms based on the specified template.
+# That template should have ssh keys or a known password so
+# ansible may run against them:
+
+- name: Create vSphere VMs from a vm template
+  hosts: photon
+#  gather_facts: false
+  connection: local
+  tasks:
+    - vsphere_guest:
+        vcenter_hostname: "{{ vcenter_hostname }}"
+        power_on_after_clone: no
+        validate_certs: "{{ hostvars[vcenter_hostname]['vsphere_validate_certs'] }}"
+        username: "{{ hostvars[vcenter_hostname]['vsphere_username'] }}"
+        password: "{{ hostvars[vcenter_hostname]['vsphere_password'] }}"
+        guest: "{{ ansible_host }}"
+        from_template: yes
+        template_src: "{{ hostvars[vcenter_hostname]['vsphere_template_src'] }}"
+        cluster: "{{ hostvars[vcenter_hostname]['vsphere_cluster'] }}"
+        resource_pool: "{{ hostvars[vcenter_hostname]['vsphere_resource_pool'] }}"
+#        vmware_guest_facts: yes
+        vm_extra_config:
+          folder: "{{ hostvars[vcenter_hostname]['vsphere_folder'] }}"
+    - vsphere_guest:
+        vcenter_hostname: "{{ vcenter_hostname }}"
+        validate_certs: "{{ hostvars[vcenter_hostname]['vsphere_validate_certs'] }}"
+        username: "{{ hostvars[vcenter_hostname]['vsphere_username'] }}"
+        password: "{{ hostvars[vcenter_hostname]['vsphere_password'] }}"
+        guest: "{{ ansible_host }}"
+#        from_template: yes
+#        template_src: "{{ hostvars[vcenter_hostname]['vsphere_template_src'] }}"
+        cluster: "{{ hostvars[vcenter_hostname]['vsphere_cluster'] }}"
+        resource_pool: "{{ hostvars[vcenter_hostname]['vsphere_resource_pool'] }}"
+        vmware_guest_facts: yes
+#        vm_extra_config:
+#          folder: "{{ hostvars[vcenter_hostname]['vsphere_folder'] }}"
+#    - debug:
+#        msg: "{{ hostvars[ansible_host] }}"
+
+- name: generate seed-iso
+  hosts: photon
+  connection: local
+  vars:
+    seed_iso_base: /tmp/iso
+  tasks:
+    - name: make seed-iso base dir
+      file: path="{{ seed_iso_base }}/{{ inventory_hostname }}" state=directory
+      tags: ["cloudinit"]
+    - name: make meta-data
+      copy: "content='instance-id: iid-local01\nlocal-hostname: cloudimg\n' dest='{{ seed_iso_base }}/{{ inventory_hostname }}/meta-data'"
+      tags: ["cloudinit"]
+    - name: make user-data
+      copy:
+        content: |
+          #cloud-config
+          hostname: {{ inventory_hostname }}
+        dest: "{{ seed_iso_base }}/{{ inventory_hostname }}/user-data"
+      tags: ["cloudinit"]
+    - name: generate iso, push to vcenter datastore, and mount
+      shell: |
+        genisoimage -o seed.iso -volid cidata -joliet -rock user-data meta-data;
+        govc datastore.upload -u='https://{{ hostvars[vcenter_hostname]['vsphere_username'] }}:{{ hostvars[vcenter_hostname]['vsphere_password'] }}@{{ vcenter_hostname }}/sdk' -ds smallSlow seed.iso {{ inventory_hostname }}/config.iso
+        govc device.cdrom.insert -u='https://{{ hostvars[vcenter_hostname]['vsphere_username'] }}:{{ hostvars[vcenter_hostname]['vsphere_password'] }}@{{ vcenter_hostname }}/sdk' -vm /{{ hostvars[vcenter_hostname]['vsphere_datacenter'] }}/vm/{{ hostvars[vcenter_hostname]['vsphere_folder'] }}/{{ inventory_hostname }} -device {{ vcenter_cdrom_device }} {{ inventory_hostname }}/config.iso
+        govc device.connect -u='https://{{ hostvars[vcenter_hostname]['vsphere_username'] }}:{{ hostvars[vcenter_hostname]['vsphere_password'] }}@{{ vcenter_hostname }}/sdk' -vm /{{ hostvars[vcenter_hostname]['vsphere_datacenter'] }}/vm/{{ hostvars[vcenter_hostname]['vsphere_folder'] }}/{{ inventory_hostname }} {{ vcenter_cdrom_device }}
+      args:
+        creates: seed.iso
+        chdir: '{{ seed_iso_base }}/{{ inventory_hostname }}'
+      tags: ["cloudinit"]
+    - name: Power on
+      vmware_guest:
+        name: "{{ ansible_host }}"
+        uuid: "{{ hw_product_uuid }}"
+        state: poweredon
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ hostvars[vcenter_hostname]['vsphere_username'] }}"
+        password: "{{ hostvars[vcenter_hostname]['vsphere_password'] }}"
+        validate_certs: no
+        template:
+      tags: ["cloudinit"]
+    - name: Wait for up
+      vmware_guest:
+        name: "{{ ansible_host }}"
+        uuid: "{{ hw_product_uuid }}"
+        wait_for_ip_address: yes
+        state: present
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ hostvars[vcenter_hostname]['vsphere_username'] }}"
+        password: "{{ hostvars[vcenter_hostname]['vsphere_password'] }}"
+        validate_certs: no
+        template:
+      tags: ["cloudinit"]
+
+    - name: Reboot
+      vmware_guest:
+        name: "{{ ansible_host }}"
+        uuid: "{{ hw_product_uuid }}"
+        state: restarted
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ hostvars[vcenter_hostname]['vsphere_username'] }}"
+        password: "{{ hostvars[vcenter_hostname]['vsphere_password'] }}"
+        validate_certs: no
+        template:
+      tags: ["cloudinit"]
+
+

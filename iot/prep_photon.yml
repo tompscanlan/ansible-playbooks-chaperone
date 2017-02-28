@@ -1,0 +1,12 @@
+---
+
+# send ssh keys and get the photon hosts ready
+- name: distribute ssh keys to the new vms
+  include: sshkeys.yml
+
+- name: Prepare VMs
+  hosts: photon
+  roles:
+    - photon
+    - pip
+    - liota

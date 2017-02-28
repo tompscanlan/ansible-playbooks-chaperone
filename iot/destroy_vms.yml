@@ -1,0 +1,34 @@
+---
+
+- name: Destroy vSphere VMs
+  hosts: photon
+  gather_facts: false
+  connection: local
+  vars:
+    seed_iso_base: /tmp/iso
+  tasks:
+    - name: disconnect cdrom, turn off
+      shell: |
+        govc vm.power -off -force -u='https://{{ hostvars[vcenter_hostname]['vsphere_username'] }}:{{ hostvars[vcenter_hostname]['vsphere_password'] }}@{{ vcenter_hostname }}/sdk'  /{{ hostvars[vcenter_hostname]['vsphere_datacenter'] }}/vm/{{ hostvars[vcenter_hostname]['vsphere_folder'] }}/{{ inventory_hostname }}
+      tags: ["cloudinit"]
+      ignore_errors: yes
+      changed_when: False
+
+    - vsphere_guest:
+        state: absent
+        force: yes
+        vcenter_hostname: "{{ vcenter_hostname }}"
+        guest: "{{ ansible_host }}"
+        validate_certs: no
+        username: "{{ hostvars[vcenter_hostname]['vsphere_username'] }}"
+#        password: "VMware1!"
+        password: "{{ hostvars[vcenter_hostname]['vsphere_password'] }}"
+        cluster: "{{ hostvars[vcenter_hostname]['vsphere_cluster'] }}"
+        validate_certs: no
+        resource_pool: "{{ hostvars[vcenter_hostname]['vsphere_resource_pool'] }}"
+        vm_extra_config:
+          folder: "{{ hostvars[vcenter_hostname]['vsphere_folder'] }}"
+    - name: clean seed-iso dirs
+      file: path="{{ seed_iso_base }}/{{ inventory_hostname }}" state=absent
+      tags: ["cloudinit"]
+

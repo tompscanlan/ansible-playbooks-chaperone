@@ -1,1 +1,2 @@
+#vsphere_password: "VMware1!"
 vsphere_password: "{{ vault_vsphere_password }}"
