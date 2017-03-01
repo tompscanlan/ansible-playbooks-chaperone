@@ -5,8 +5,32 @@
   include: sshkeys.yml
 
 - name: Prepare VMs
+  gather_facts: false
   hosts: photon
   roles:
     - photon
     - pip
     - liota
+  tasks:
+
+    - name: Open Mosquitto ports
+      iptables:
+        chain: INPUT
+        protocol: tcp
+        destination_port: "{{ item }}"
+        jump: ACCEPT
+      with_items:
+        - 1883
+        - 9001
+      tags: ["docker"]
+
+    - name: Run Mosquitto service
+      docker_container:
+        name: mosquitto
+        image: toke/mosquitto
+        state: started
+        published_ports:
+          - 1883:1883
+          - 9001:9001
+      run_once: true
+      tags: ["docker"]
