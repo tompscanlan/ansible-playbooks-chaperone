@@ -5,7 +5,7 @@
   include: sshkeys.yml
 
 - name: Prepare VMs
-  gather_facts: false
+#  gather_facts: false
   hosts: photon
   roles:
     - photon
@@ -20,7 +20,11 @@
         destination_port: "{{ item }}"
         jump: ACCEPT
       with_items:
+        - 80
         - 1883
+        - 2003
+        - 2004
+        - 7002
         - 9001
       tags: ["docker"]
 
@@ -32,5 +36,18 @@
         published_ports:
           - 1883:1883
           - 9001:9001
+      run_once: true
+      tags: ["docker"]
+
+    - name: Run Graphite service
+      docker_container:
+        name: graphite
+        image: nickstenning/graphite
+        state: started
+        published_ports:
+          - 80:80
+          - 2003:2003
+          - 2004:2004
+          - 7002:7002
       run_once: true
       tags: ["docker"]
