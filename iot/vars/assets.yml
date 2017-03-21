@@ -8,6 +8,11 @@ downloads_timeout: 10
 
 assets:
     photon.ova:
-        description: "photon ova"
+        description: "photon 1.0 ova"
         checksum: "18c1a6d31545b757d897c61a0c3cc0e54d8aeeba"
         url:  "https://bintray.com/vmware/photon/download_file?file_path=photon-custom-hw11-1.0-62c543d.ova"
+
+    vrops-6.5.0.ova:
+        description: "vROPS 6.5.0"
+        checksum: "5d6350dc493c3025ff1927025c5a79e3766f08ae"
+        url:  "http://build-squid.eng.vmware.com/build/mts/release/bora-5097674/publish/vRealize-Operations-Manager-Appliance-6.5.0.5097674_OVF10.ova"

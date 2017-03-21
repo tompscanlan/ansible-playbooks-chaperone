@@ -5,3 +5,8 @@ vcenter_hostname: vcenter.home.local
 
 # found via: govc device.ls -vm /Goddard/vm/chap-test/photon03
 vcenter_cdrom_device: cdrom-3002
+
+
+liota_github_url: git+https://github.com/tompscanlan/liota.git
+liota_github_branch: systemd-units
+liota_version: github

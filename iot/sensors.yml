@@ -1,0 +1,16 @@
+- name: Deploy Simulated Sensors
+  hosts: sensors
+  gather_facts: no
+
+  tasks:
+
+    # docker run -t --rm --link mosquitto mqtt-sim publish.py --topic 'device/test' --host mosquitto "more of same"
+    - name: Run mqtt-simulator
+      docker_container:
+        name: "{{ inventory_hostname }}"
+        image: tompscanlan/mqtt-simulator
+        state: started
+        command: publish.py --topic 'device/{{ inventory_hostname }}' --host 192.168.1.131 "model.bike.speed 2mph" --loop
+        pull: yes
+      delegate_to: photon02
+      tags: ["docker"]

@@ -1,21 +1,17 @@
 ---
-- name: Distribute local ssh key to all hosts
-  hosts: all:!vcenter:!localhost
+- name: Distribute ssh keys
+  hosts: all:!vcenter:!localhost:!sensors
   gather_facts: false
   tasks:
-    - name: Set authorized keys
+    - name: Distribute local ssh key
       authorized_key:
         user: "{{ remote_user }}"
         state: present
         key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
-- name: Distribute github ssh keys to all hosts
-  hosts: all:!vcenter:!localhost
-  gather_facts: false
-  tasks:
-    - name: Set authorized keys
-      authorized_key:
-        user: "{{ remote_user }}"
-        state: present
-        key: "https://github.com/{{ github_userid }}.keys"
-      when: github_userid is defined
+     - name: Distribute github ssh keys
+       authorized_key:
+         user: "{{ remote_user }}"
+         state: present
+         key: "https://github.com/{{ github_userid }}.keys"
+       when: github_userid is defined

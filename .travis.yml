@@ -9,13 +9,6 @@ addons:
 
 sudo: required
 
-addons:
-  apt:
-    packages:
-      - curl
-
-sudo: required
-
 before_install:
   - env
   - curl https://storage.googleapis.com/git-repo-downloads/repo > /tmp/repo
@@ -26,7 +19,7 @@ before_install:
   - export CHAPERONE_BRANCH="master"
   - git config --global user.email "you@example.com"
   - git config --global user.name "Your Name"
-  - git ls-remote --exit-code --heads https://github.com/$GIT_USER/chaperone "$TRAVIS_BRANCH" && CHAPERONE_BRANCH=$TRAVIS_BRANCH || true
+  - git ls-remote --exit-code --heads https://github.com/$GIT_USER/chaperone "$TRAVIS_BRANCH" && export CHAPERONE_BRANCH=$TRAVIS_BRANCH || true
 
 install:
   - pip install ansible

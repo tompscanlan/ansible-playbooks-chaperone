@@ -3,11 +3,19 @@
 ## initial setup
 
 ```
+
+cd ansible/playbooks/ansible
+ansible-playbook  -i inventory  -e '{"ansible_additional_packages": ["vim","genisoimage"]}' ansible.yml
+cd ../iot
+ 
 sshkeygen
-ansible-playbook --ask-pass -i /mnt/inventory/  sshkeys.yaml
+ansible-playbook --ask-pass -i /mnt/inventory/  site.yml
+
+
 
 # to also copy ssh keys from github account:
 ansible-playbook --ask-pass -i /mnt/inventory/  sshkeys.yaml -e 'github_userid=tompscanlan'
+
 
 # download photon ova and install it as a template in vcenter
 ansible-playbook -i /mnt/inventory/  vm_template_prep.yml --vault-password-file .vault_pass.txt
@@ -19,4 +27,5 @@ ansible-playbook -i /mnt/inventory/  new_vsphere_vms_from_template.yml  --vault-
 # populate the new vm IPs in /etc/hosts
 # re-run the sshkeys play to push keys out to the new VMs
 ansible-playbook --ask-pass -i /mnt/inventory/  sshkeys.yaml
+
 ```

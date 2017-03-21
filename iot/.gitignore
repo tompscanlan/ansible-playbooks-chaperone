@@ -12,11 +12,15 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
----
-
-- include: download_assets.yml
-- include: import_ova.yml
-# after import, you'll want to customize the vm, save it as a template and clone from there
-
-#- include: clone_vm_from_template.yml
-- include: prep_photon.yml
+#
+# Temporary files from editing and compiling
+*~
+.*.swp
+*.bak
+.secret_key_store
+.DS_Store
+# Local needs
+inventory
+roles
+# virtualenv
+venv

@@ -12,11 +12,22 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+#
 ---
+- name: Import OVAs into vcenter
+  hosts: vcenter
+  connection: local
 
-- include: download_assets.yml
-- include: import_ova.yml
-# after import, you'll want to customize the vm, save it as a template and clone from there
-
-#- include: clone_vm_from_template.yml
-- include: prep_photon.yml
+  roles:
+    - govc
+  vars:
+    govc_host: "{{ ansible_host }}"
+    govc_datastore: "{{ vsphere_datastore }}"
+    govc_username: "{{ vsphere_username }}"
+    govc_password: "{{ vsphere_password }}"
+    govc_insecure: "{{ vsphere_insecure }}"
+    govc_ova_imports:
+      - name: photon-import
+        ova: /tmp/photon.ova
+      - name: vrops-6.5.0-import
+        ova: /tmp/vrops-6.5.0.ova

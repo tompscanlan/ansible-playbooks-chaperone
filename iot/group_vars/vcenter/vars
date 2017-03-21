@@ -1,5 +1,6 @@
 # any of these could be redefined in host_vars
 vsphere_validate_certs: no
+vsphere_insecure: true
 vsphere_username: administrator@home.local
 vsphere_guest: "{{ansible_host}}"
 vsphere_template_src: photon-password
@@ -7,3 +8,4 @@ vsphere_datacenter: Goddard
 vsphere_cluster: BasementLab
 vsphere_resource_pool: "/Resources"
 vsphere_folder: chap-test
+vsphere_datastore: "terra disk1"

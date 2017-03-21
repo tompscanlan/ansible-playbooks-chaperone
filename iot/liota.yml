@@ -1,0 +1,12 @@
+- name: Install Liota
+  hosts: liota
+  roles:
+#    - { role: liota, liota_state: absent }
+#    - { role: liota, liota_version: 0.2 }
+    - { role: liota, liota_state: absent }
+    - liota
+  vars:
+    liota_github_url: git+https://github.com/tompscanlan/liota.git
+    liota_github_branch: ansilble-working
+    liota_version: github
+    liota_log_level: DEBUG

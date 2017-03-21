@@ -12,11 +12,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+#
 ---
+- name: Download Assets
+  hosts: localhost
 
-- include: download_assets.yml
-- include: import_ova.yml
-# after import, you'll want to customize the vm, save it as a template and clone from there
+  roles:
+    - role: assets
 
-#- include: clone_vm_from_template.yml
-- include: prep_photon.yml
+  vars_files:
+    - vars/assets.yml
