@@ -56,13 +56,11 @@
               root:VMware1!
             expire: False
           ssh_pwauth: True
-          groups:
-            - users
-            - admin
           users:
             - name: vmware
               passwd: $6$rounds=8888$y1zBWcO8MT$J2a599jjEaJDV5Vq3t4yEKz7CVOmJqidRmv4h1fXlkzHArHEcBNUVwbnSGrIaJ2aHUwxRMS193SyuH9fKQJD20
               sudo: ALL=(ALL) NOPASSWD:ALL
+              groups: users,wheel
               lock_passwd: false
               ssh-authorized-keys:
                 - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAdBqhqy4mbxIydSgi6/H5Oz6en5t5MQQo06aYlJqW4b3LDLZU1rysaWCC+eQA8iA/VvKjSGUWIKFAanGtst9ouKwyHkZPPufDCOmnPlh2rLQDN1qYfZv9OQpQPc5txc+Ss5MJydge0jj0+AzJHx2/TegviGqQdrnLzyXl0TK4Vdu8eU+0L63x6vdOW2gpnatF8VpT2jYYhR6O2HvqNXFk/iNu609OFgiQcVoFYSC+nlpgWZfDG3+r2dtuPRON5opuNffQ5m82OQZlNVy38IVwGBemKAalqKyhPLHo9fCNfG/ArIVjWtxmBBZCGc1MnNrCuWMiSsu5+7TgkNSUmxht tscanlan@tscanlan-mbp15.local
