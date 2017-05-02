@@ -1,0 +1,102 @@
+#
+#  Copyright 2017 VMware, Inc.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
+---
+- hosts: packer
+  become: yes
+  vars:
+    sudo_users:
+      - { userid: vmware, group: vmware }
+    ansible_additional_packages:
+      - vim
+  roles:
+    - sudo
+    - vmware-workstation
+    - andrewrothstein.packer
+    - govc
+    - ovftool
+  post_tasks:
+    - name: install packages needed by vmware packer build
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - x11-apps
+        - libxtst6
+        - libxinerama1
+        - libxi6
+    - name: Download packer config repo
+      command: git clone --branch add-packer https://github.com/tompscanlan/chaperone
+      args:
+        creates: ~/chaperone
+      become: no
+
+    - name: Build vmx
+      command: packer build ubuntu-16.04-amd64-local.json
+      args:
+        chdir: ~/chaperone/packer
+        creates: ~/chaperone/packer/base-vmware/chaperone.vmx
+      become: no
+#
+#    - name: Push vmx as VM to vcenter
+#      command: ovftool -ds="{{ datastore }}" -n=testvm  --net:"nat"="{{ network }}" ~vmware/chaperone/packer/base-vmware/chaperone.vmx 'vi://{{ vsphere_user }}:{{ vsphere_password }}@{{ vcenter }}/{{ datacenter }}/host/{{ cluster }}'
+#      become: no
+
+- hosts: packer
+  become: yes
+  pre_tasks:
+    - name: Create ova
+      command: ovftool base-vmware/chaperone.vmx chaperone.ova
+      args:
+        chdir: ~/chaperone/packer
+        creates: chaperone.ova
+      become: no
+    - name: Create ova spec file
+      copy:
+        content: >
+          {
+            "DiskProvisioning":"thin",
+            "IPAllocationPolicy":"dhcpPolicy",
+            "IPProtocol":"IPv4",
+            "NetworkMapping":[
+              {"Name":"nat","Network":"{{ network }}"}
+              ],
+            "PowerOn":true,
+            "InjectOvfEnv":false,
+            "WaitForIP":true,
+            "Name":null
+           }
+
+        dest: "/home/{{ ansible_user }}/chaperone/packer/chaperone.spec"
+
+  roles:
+    - govc
+  vars:
+    govc_host: "{{ vcenter }}"
+    govc_datastore: "{{ datastore }}"
+    govc_username: "{{ vsphere_user }}"
+    govc_password: "{{ vsphere_password }}"
+    govc_insecure: True
+    govc_resource_pool: "/{{ datacenter }}/host/{{ cluster }}"
+    govc_ova_imports:
+      - name: testgovc4
+        ova:  "~{{ ansible_user }}/chaperone/packer/chaperone.ova"
+        spec: "/home/{{ ansible_user }}/chaperone/packer/chaperone.spec"
+
+
+
+#    - name: Push vmx as VM to vcenter
+#      command: ovftool -ds="{{ datastore }}" -n=testvm  --net:"nat"="{{ network }}" ~vmware/chaperone/packer/base-vmware/chaperone.vmx 'vi://{{ vsphere_user }}:{{ vsphere_password }}@{{ vcenter }}/{{ datacenter }}/host/{{ cluster }}'
+#      become: no
