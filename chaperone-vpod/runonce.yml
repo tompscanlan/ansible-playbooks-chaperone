@@ -1,0 +1,10 @@
+---
+
+- hosts: router
+  become: yes
+  roles:
+    - sudo
+    - sshkeys
+    - assets
+  vars_files:
+    - vars/assets.yml

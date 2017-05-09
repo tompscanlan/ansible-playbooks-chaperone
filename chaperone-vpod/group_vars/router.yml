@@ -1,0 +1,61 @@
+dnsmasq_domain_name: "chaperone.vmware.local"
+
+dnsmasq_external_interfaces:
+  - search: 'corp.local vmware.com'
+    broadcast: '192.168.0.255'
+    prefixbits: "24"
+    netmask: '255.255.255.0'
+    address: '192.168.0.2'
+    device: 'ens32'
+    type: 'static'
+    gateway: '192.168.0.1'
+    name: "external"
+    dns1: '10.148.152.8'
+    dns2: '127.0.0.1'
+
+
+dnsmasq_dhcp_networks:
+  - netmask: '255.255.255.0'
+    address: '192.168.110.1'
+    broadcast: '192.168.110.255'
+    device: 'ens33'
+    range: "192.168.110.100,192.168.110.240"
+    lease: 1440
+    dns: "192.168.110.2"
+
+
+iptables_masquerade: True
+
+# network info for the NAT itself
+iptables_nat_networks:
+  - internal_net: "192.168.110.0/24"
+    external_dev: "ens32"
+
+# allowed networks (free access)
+iptables_allowed_networks:
+  - "192.168.110.0/24"
+
+# port forwarding
+iptables_forwards:
+  - interface: ens32
+    proto: tcp
+    inport: 443
+    fwd_address: 192.168.110.22
+    dport: 22
+  - { interface: ens32, proto: tcp, inport: 2222, fwd_address: 192.168.110.22, dport: 22 }
+
+  # rdp
+  - { interface: ens32, proto: tcp, inport: 3389, fwd_address: 192.168.110.10, dport: 3389 }
+
+# port allowance (if you forward, you better allow too)
+iptables_enable_ports:
+  # for packer builds
+  - { port: 5941, proto: "tcp" }
+  # rdp
+  - { port: 3389, proto: "tcp" }
+  - { port: 443, proto: "tcp" }
+  - { port: 2222, proto: "tcp" }
+  - { port: "53", proto: "udp" }
+  - { port: "67", proto: "udp" }
+  - { port: "68", proto: "udp" }
+

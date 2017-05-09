@@ -1,0 +1,7 @@
+- name: Provision vCenter Appliance
+  hosts: chaperone
+  roles:
+   - vcsa
+  vars:
+    vcsa_task_directory: "../../roles/vcsa/tasks/"
+    chaperone_log_directory: "/tmp"

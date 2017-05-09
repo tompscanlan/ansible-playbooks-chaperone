@@ -1,5 +1,5 @@
 #
-#  Copyright 2015 VMware, Inc.
+#  Copyright 2017 VMware, Inc.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -13,10 +13,17 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-[defaults]
-remote_user = vmware
-roles_path = ../../roles
-host_key_checking = False
-#library = /usr/share/ansible:../library
-library = ../../library
-vault_password_file = ~/.vault_pass.txt
+---
+- hosts: packer
+  become: yes
+  vars:
+    ovf_zip_url: http://{{ groups['assets'][0] }}:8484/VMware-ovftool-4.1.0-2459827-lin.x86_64.zip
+  pre_tasks:
+    - debug: var=groups
+  roles:
+    - sudo
+    - vmware-workstation
+    - andrewrothstein.packer
+    - govc
+    - ovftool
+  post_tasks:

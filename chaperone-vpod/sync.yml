@@ -1,0 +1,13 @@
+---
+
+- hosts: chaperone
+  become: no
+  tasks:
+    - name: Sync source tree to remote chaperone
+      synchronize:
+        src: "../../../"
+        dest: "/home/vmware/chaperone"
+        recursive: yes
+        rsync_opts: "--no-motd,--exclude=.git,--exclude=packer/"
+        archive: no
+        delete: yes
